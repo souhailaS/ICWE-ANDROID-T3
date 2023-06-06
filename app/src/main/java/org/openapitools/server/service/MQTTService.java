@@ -104,7 +104,7 @@ public class MQTTService extends Service {
             @Override
             public void connectComplete(boolean b, String s) {
                 if (!subscribed) {
-                    subscribeTopic(getApplicationContext(), "ShoppingCenterReceivers");
+                    subscribeTopic(getApplicationContext(), "ShoppingCenterReceivers-ss");
                     Log.d(TAG, "Subscribed to request");
 
                     //Change state on MainActivity TextView
@@ -119,7 +119,7 @@ public class MQTTService extends Service {
             @Override
             public void connectionLost(Throwable throwable) {
                 Log.d(TAG, "Service connection lost");
-                subscribeTopic(getApplicationContext(), "ShoppingCenterReceivers");
+                subscribeTopic(getApplicationContext(), "ShoppingCenterReceivers-ss");
 
                 //Change state on MainActivity TextView
                 Intent intentDevice = new Intent();

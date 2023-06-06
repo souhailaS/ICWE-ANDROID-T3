@@ -10,111 +10,185 @@
  * Do not edit the class manually.
  */
 
-package org.openapitools.server.resource;
+ package org.openapitools.server.resource;
 
 
-import org.openapitools.server.model.*;
-import org.openapitools.server.response.*;
-
-import java.util.*;
-import org.json.*;
-
-
-import org.openapitools.server.model.Location;
-import org.openapitools.server.model.Temperature;
-
-
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.io.UnsupportedEncodingException;
-import android.content.Context;
-import org.openapitools.server.service.MqttClient;
-import org.openapitools.server.service.MQTTService;
-import org.eclipse.paho.client.mqttv3.MqttException;
-
-
-public class UserResource {
-
-    private Context context;
-    private MqttClient client;
-
-    private UserResponse userResponse;
-
-    public UserResource(Context context) {
-        this.context = context;
-        client = new MqttClient();
-    }
-
-  public Exception executeMethod(UserResponse response) throws MqttException, UnsupportedEncodingException{
-
-        userResponse=response;
-
-      switch (response.getMethod()){
-          case "getLocation":
-           getLocation();
-          break;
-          case "getMusic":
-           getMusic();
-          break;
-          case "getTemperature":
-           getTemperature();
-          break;
-          default:
-              client.publishMessage( MQTTService.getClient(), "Error: Not Found Method",1,userResponse.getSender());
-              return new Exception("Not found method.");
+ import org.openapitools.server.model.*;
+ import org.openapitools.server.response.*;
+ 
+ import java.text.DecimalFormat;
+ import java.text.DecimalFormatSymbols;
+ import java.util.*;
+ import org.json.*;
+ 
+ 
+ import org.openapitools.server.model.Location;
+ import org.openapitools.server.model.Temperature;
+ 
+ 
+ 
+ import java.util.ArrayList;
+ import java.util.HashMap;
+ import java.util.List;
+ import java.util.Map;
+ import java.io.UnsupportedEncodingException;
+ import android.content.Context;
+ import android.text.TextUtils;
+ import android.util.Log;
+ 
+ import com.google.gson.Gson;
+ import com.google.gson.GsonBuilder;
+ 
+ import org.openapitools.server.service.MqttClient;
+ import org.openapitools.server.service.MQTTService;
+ import org.eclipse.paho.client.mqttv3.MqttException;
+ 
+ 
+ public class UserResource {
+ 
+     private Context context;
+     private MqttClient client;
+ 
+     private UserResponse userResponse;
+ 
+     //Tutorial ICWE
+     private JSONObject response=new JSONObject();
+ 
+     //Location
+     private String locations = "[{\"latitude\":38.514431,\"longitude\":-6.844611},{\"latitude\":38.876952,\"longitude\":-6.970341},{\"latitude\":39.472277,\"longitude\":-6.374065}]";
+ 
+     //Music
+     private String[] music = {"pop","rock","jazz","metal","indie","edm","techno","trance","soul","classic","chill","rap","country","reggaeton","hip-hop"};
+ 
+ 
+     //Temperature
+     private static DecimalFormat df2 = new DecimalFormat("0.00",new DecimalFormatSymbols(Locale.ENGLISH));
+     private int min=35;
+     private int max=40;
+ 
+ 
+ 
+     public UserResource(Context context) {
+         this.context = context;
+         client = new MqttClient();
+     }
+ 
+   public Exception executeMethod(UserResponse response) throws MqttException, UnsupportedEncodingException{
+ 
+         userResponse=response;
+ 
+       switch (response.getMethod()){
+           case "getLocation":
+            getLocation();
+           break;
+           case "getMusic":
+            getMusic();
+           break;
+           case "getTemperature":
+            getTemperature();
+           break;
+           default:
+               client.publishMessage( MQTTService.getClient(), "Error: Not Found Method",1,userResponse.getSender());
+               return new Exception("Not found method.");
+       }
+ 
+       return null;
+   }
+ 
+   /**
+   * Gets the current location
+   * 
+    * @return Location
+   */
+   public void getLocation () throws MqttException, UnsupportedEncodingException{
+ 
+      //TODO: Process the information, etc.
+ 
+       try {
+           response.put("idRequest",userResponse.getIdRequest());
+           response.put("devices",userResponse.getDevices());
+           Gson gson=new GsonBuilder().create();
+           String jsonArray=gson.toJson(locations);
+ 
+           response.put("body",locations);
+ 
+           Log.i("Result", jsonArray);
+ 
+       } catch (JSONException e) {
+ 
+           e.printStackTrace();
+       }
+ 
+ 
+      //TODO: Return Location on reply.
+       client.publishMessage( MQTTService.getClient(), String.valueOf(response),1,userResponse.getSender());
+   }
+   /**
+   * Gets a list of favourite music genres
+   * 
+    * @return List<String>
+   */
+   public void getMusic () throws MqttException, UnsupportedEncodingException{
+ 
+      //TODO: Process the information
+ 
+       try {
+ 
+           response.put("idRequest",userResponse.getIdRequest());
+           response.put("devices",userResponse.getDevices());
+           String str = TextUtils.join(",", music);
+ 
+           Gson gson=new GsonBuilder().create();
+           String jsonArray=gson.toJson(Arrays.asList(music));
+ 
+           response.put("body",jsonArray);
+ 
+           Log.i("Result", jsonArray);
+ 
+       } catch (JSONException e) {
+ 
+           e.printStackTrace();
+       }
+       //TODO: Return List<String> on reply.
+       Log.i("send msg to ",userResponse.getSender()+"|"+response);
+       client.publishMessage(MQTTService.getClient(), String.valueOf(response),1,userResponse.getSender());
+ 
+   }
+   /**
+   * Gets the environment temperature
+   * 
+    * @return Temperature
+   */
+   public void getTemperature () throws MqttException, UnsupportedEncodingException{
+ 
+      //TODO: Process the information, etc.
+       //TODO: Return Double on body.
+       Log.i("ID REQUEST", userResponse.getIdRequest());
+ 
+ 
+       Random r = new Random();
+       double random = min + r.nextDouble() * (max - min);
+       double temp = Double.valueOf(df2.format(random));
+       Log.i("Tmp: ", String.valueOf(temp));
+ 
+       try {
+ 
+           response.put("idRequest",userResponse.getIdRequest());
+           response.put("devices",userResponse.getDevices());
+           response.put("body",temp);
+       } catch (JSONException e) {
+ 
+           e.printStackTrace();
+       }
+ 
+       Log.i("send msg to ",userResponse.getSender()+"|"+response);
+       client.publishMessage(MQTTService.getClient(), String.valueOf(response),1,userResponse.getSender());
+ 
+ 
       }
-
-      return null;
-  }
-
-  /**
-  * Gets the current location
-  * 
-   * @return Location
-  */
-  public void getLocation () throws MqttException, UnsupportedEncodingException{
-
-     //TODO: Process the information, etc.
-
-
-
-     //TODO: Return Location on reply.
-      client.publishMessage( MQTTService.getClient(), "getLocation OK",1,userResponse.getSender());
-  }
-  /**
-  * Gets a list of favourite music genres
-  * 
-   * @return List<String>
-  */
-  public void getMusic () throws MqttException, UnsupportedEncodingException{
-
-     //TODO: Process the information, etc.
-
-
-
-     //TODO: Return List<String> on reply.
-      client.publishMessage( MQTTService.getClient(), "getMusic OK",1,userResponse.getSender());
-  }
-  /**
-  * Gets the environment temperature
-  * 
-   * @return Temperature
-  */
-  public void getTemperature () throws MqttException, UnsupportedEncodingException{
-
-     //TODO: Process the information, etc.
-
-
-
-     //TODO: Return Temperature on reply.
-      client.publishMessage( MQTTService.getClient(), "getTemperature OK",1,userResponse.getSender());
-  }
-
-
-
-
-
-}
+ 
+ 
+ 
+ 
+ 
+ }
