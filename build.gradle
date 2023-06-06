@@ -1,0 +1,29 @@
+group = 'org.openapitools'
+project.version = '1.0.0'
+
+buildscript {
+    repositories {
+        mavenCentral()
+        jcenter()
+        google()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:3.5.1'
+        classpath 'com.google.gms:google-services:4.3.2'
+    }
+}
+
+allprojects {
+    repositories {
+        jcenter()
+        google()
+        flatDir {
+            dirs 'libs'
+        }
+        maven {
+            url "https://repo.eclipse.org/content/repositories/paho-snapshots/"
+        }
+    }
+
+
+}
