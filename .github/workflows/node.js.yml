@@ -2,7 +2,7 @@ name: ICWE23-Continuum-Mobile-Android CI
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "main" ]
 
 
 jobs:
