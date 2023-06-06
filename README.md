@@ -1,5 +1,5 @@
 # openapi-android-server
-
+TEST
 ## Requirements
 
 Building the API client library requires [Maven](https://maven.apache.org/) to be installed.
